@@ -31,6 +31,7 @@ import asynchat
 import time
 import select
 import exception
+import traceback
 
 from smtpd import SMTPServer
 from mail import Message, Parser
@@ -90,10 +91,14 @@ class LMTPChannel(asynchat.async_chat):
         asynchat.async_chat.push(self, msg + self.COMMAND_TERMINATOR)
 
     def collect_incoming_data(self, data):
-        if self.__state == self.COMMAND:
-            self.__command.append(data)
-        elif self.__state == self.DATA:
-            self.__parser.feed(data)
+        try:
+            if self.__state == self.COMMAND:
+                self.__command.append(data)
+            elif self.__state == self.DATA:
+                self.__parser.feed(data)
+        except Exception, e:
+            log.error('Unhandled failure while parsing incoming data: %s' % traceback.format_exc())
+            raise
 
     def handle_close(self):
         log.debug('<<< CLOSE <LMTPChannel at %#x>' % id(self))

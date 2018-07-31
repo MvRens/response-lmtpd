@@ -50,6 +50,7 @@ class BufferedInput(email.feedparser.BufferedSubFile):
     def __init__(self):
         email.feedparser.BufferedSubFile.__init__(self)
         self.headers_complete = False
+        self._partial = ''
 
     def push(self, data):
         data, self._partial = self._partial + data, ''
